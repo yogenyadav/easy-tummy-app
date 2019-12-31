@@ -6,11 +6,12 @@ const cookie = require('cookie');
 const nonce = require('nonce')();
 const querystring = require('querystring');
 const request = require('request-promise');
+const Shopify = require('shopify-api-node');
 
 const apiKey = "251849bc52bdd0e716bbc867df396fe7"; //process.env.SHOPIFY_API_KEY;
 const apiSecret = "19aed7a267ef3407cb42d0ca8d18fa4b"; //process.env.SHOPIFY_API_SECRET;
 const scopes = 'read_products';
-const forwardingAddress = "http://cc125d6e.ngrok.io";
+const forwardingAddress = "https://777f1c34.ngrok.io";
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -80,27 +81,87 @@ app.get('/custom-shopify/callback', (req, res) => {
             code,
         };
 
-        request.post(accessTokenRequestUrl, { json: accessTokenPayload })
-            .then((accessTokenResponse) => {
-                const accessToken = accessTokenResponse.access_token;
-                const shopRequestUrl = 'https://' + shop + '/admin/api/2019-10/shop.json';
-                const shopRequestHeaders = {
-                    'X-Shopify-Access-Token': accessToken,
-                };
+        shopResponse = '<!DOCTYPE html> \
+        <html> \
+        <body> \
+        <a href="https://777f1c34.ngrok.io/custom-shopify/getProducts">list products</a></body> \
+        </br> \
+        <a href="https://777f1c34.ngrok.io/custom-shopify/addProduct">add product</a></body> \
+        </html>';
 
-                request.get(shopRequestUrl, { headers: shopRequestHeaders })
-                    .then((shopResponse) => {
-                        res.status(200).end(shopResponse);
-                    })
-                    .catch((error) => {
-                        res.status(error.statusCode).send(error.error.error_description);
-                    });
-            })
-            .catch((error) => {
-                res.status(error.statusCode).send(error.error.error_description);
-            });
+        res.status(200).end(shopResponse);
+
+        // request.post(accessTokenRequestUrl, { json: accessTokenPayload })
+        //     .then((accessTokenResponse) => {
+        //         const accessToken = accessTokenResponse.access_token;
+        //         const shopRequestUrl = 'https://' + shop + '/admin/api/2019-10/shop.json';
+        //         const shopRequestHeaders = {
+        //             'X-Shopify-Access-Token': accessToken,
+        //         };
+
+        //         request.get(shopRequestUrl, { headers: shopRequestHeaders })
+        //             .then((shopResponse) => {
+        //                 res.status(200).end(shopResponse);
+        //             })
+        //             .catch((error) => {
+        //                 res.status(error.statusCode).send(error.error.error_description);
+        //             });
+        //     })
+        //     .catch((error) => {
+        //         res.status(error.statusCode).send(error.error.error_description);
+        //     });
 
     } else {
         res.status(400).send('Required parameters missing');
     }
 });
+
+app.get('/custom-shopify/getProducts', (req, res) => {
+    shopify = new Shopify({
+        shopName: 'prayog-test-store',
+        apiKey: '6134e6ba8ceb59fd7f089b9efb905539',
+        password: '90fdb717fa701ddf6e386e97c8b055c6'
+      });
+    shopify.product.list()
+    .then(products =>  res.send(products))
+    .catch(err => {
+        console.log(err);
+        res.send(err);
+    });
+});
+
+app.get('/custom-shopify/addProduct', (req, res) => {
+    create_a_product();
+});
+
+// Create a new product
+function create_a_product() {
+    shopify = new Shopify({
+        shopName: 'prayog-test-store',
+        apiKey: '6134e6ba8ceb59fd7f089b9efb905539',
+        password: '90fdb717fa701ddf6e386e97c8b055c6'
+      });
+    return shopify.product.create(
+      {
+        "title": "Burton Custom Freestlye 151",
+        "product_type": "Snowboard",
+        "vendor": "Burton"
+      }
+    )
+  }
+  
+  // Update a product
+  function update_product_after_creation(product_id) {
+    params = {
+      "title": "Burton Custom Freestyle 151 - Node Edition"
+    }
+    return shopify.product.update(product_id, params)
+  }
+  
+  create_a_product().then(
+    response => update_product_after_creation(response.id)
+  ).catch(err => {
+    console.log(err);
+    res.send(err);
+});
+  
