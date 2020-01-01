@@ -7,6 +7,7 @@ const nonce = require('nonce')();
 const querystring = require('querystring');
 const request = require('request-promise');
 const Shopify = require('shopify-api-node');
+const json = require('json');
 
 const apiKey = "251849bc52bdd0e716bbc867df396fe7"; //process.env.SHOPIFY_API_KEY;
 const apiSecret = "19aed7a267ef3407cb42d0ca8d18fa4b"; //process.env.SHOPIFY_API_SECRET;
@@ -84,7 +85,7 @@ app.get('/custom-shopify/callback', (req, res) => {
         shopResponse = '<!DOCTYPE html> \
         <html> \
         <body> \
-        <a href="https://777f1c34.ngrok.io/custom-shopify/getProducts">list products</a></body> \
+        <a href="https://777f1c34.ngrok.io/custom-shopify/listProducts">list products</a></body> \
         </br> \
         <a href="https://777f1c34.ngrok.io/custom-shopify/addProduct">add product</a></body> \
         </html>';
@@ -116,52 +117,28 @@ app.get('/custom-shopify/callback', (req, res) => {
     }
 });
 
-app.get('/custom-shopify/getProducts', (req, res) => {
-    shopify = new Shopify({
-        shopName: 'prayog-test-store',
-        apiKey: '6134e6ba8ceb59fd7f089b9efb905539',
-        password: '90fdb717fa701ddf6e386e97c8b055c6'
-      });
+shopify = new Shopify({
+    shopName: 'prayog-test-store',
+    apiKey: '6134e6ba8ceb59fd7f089b9efb905539',
+    password: '90fdb717fa701ddf6e386e97c8b055c6'
+});
+
+app.get('/custom-shopify/listProducts', (req, res) => {
     shopify.product.list()
-    .then(products =>  res.send(products))
-    .catch(err => {
-        console.log(err);
-        res.send(err);
-    });
+        .then(products => res.send(products))
+        .catch(err => {
+            console.log(err);
+            res.send(err);
+        });
 });
 
 app.get('/custom-shopify/addProduct', (req, res) => {
-    create_a_product();
+    shopify.product.create(
+        {
+            "title": "Burton Custom Freestlye 151",
+            "product_type": "Snowboard",
+            "vendor": "Burton"
+        })
+        .then(response => res.sendStatus(200))
+        .catch(err => res.sendStatus(400).send(err));
 });
-
-// Create a new product
-function create_a_product() {
-    shopify = new Shopify({
-        shopName: 'prayog-test-store',
-        apiKey: '6134e6ba8ceb59fd7f089b9efb905539',
-        password: '90fdb717fa701ddf6e386e97c8b055c6'
-      });
-    return shopify.product.create(
-      {
-        "title": "Burton Custom Freestlye 151",
-        "product_type": "Snowboard",
-        "vendor": "Burton"
-      }
-    )
-  }
-  
-  // Update a product
-  function update_product_after_creation(product_id) {
-    params = {
-      "title": "Burton Custom Freestyle 151 - Node Edition"
-    }
-    return shopify.product.update(product_id, params)
-  }
-  
-  create_a_product().then(
-    response => update_product_after_creation(response.id)
-  ).catch(err => {
-    console.log(err);
-    res.send(err);
-});
-  
