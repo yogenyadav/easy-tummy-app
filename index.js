@@ -7,7 +7,6 @@ const nonce = require('nonce')();
 const querystring = require('querystring');
 const request = require('request-promise');
 const Shopify = require('shopify-api-node');
-const json = require('json');
 
 const apiKey = "251849bc52bdd0e716bbc867df396fe7"; //process.env.SHOPIFY_API_KEY;
 const apiSecret = "19aed7a267ef3407cb42d0ca8d18fa4b"; //process.env.SHOPIFY_API_SECRET;
@@ -139,6 +138,6 @@ app.get('/custom-shopify/addProduct', (req, res) => {
             "product_type": "Snowboard",
             "vendor": "Burton"
         })
-        .then(response => res.sendStatus(200))
+        .then(response => res.status(200).send(JSON.stringify(response)))
         .catch(err => res.sendStatus(400).send(err));
 });
