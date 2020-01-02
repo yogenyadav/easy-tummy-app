@@ -1,4 +1,3 @@
-READ ME has been changed
-
-Testing update to git - Ravi
-More changes - Ravi
+partner: easy-tummy (easytummy@gmail.com/Prayog2019!) -> 
+	store: prayog-test-store (easytummy@gmail.com/Prayog2019!) ->
+		app: easy-tummy-custom 
